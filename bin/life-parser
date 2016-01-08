@@ -1,0 +1,262 @@
+#!/usr/bin/env node
+
+"use strict";
+let program = require('commander');
+let os = require('os');
+let fs = require('fs');
+let path = require('path');
+let chalk = require('chalk');
+let sortedObject = require('sorted-object');
+let _exit = process.exit;
+let eol = os.EOL;
+let generator = {
+    module: require('./generator/modules')
+};
+let sep = path.sep;
+
+let utils = require('./utils');
+let mkdir = require('./utils').mkdir;
+let copy_template = require('./utils').copy_template;
+let write = require('./utils').write;
+
+let pkg = require('../package.json');
+
+let viewEngine = 'nunjucks';
+let viewEngineSupport = [viewEngine];
+
+let theme = 'bootstrap';
+let themeSupport = [theme];
+
+let model = 'sequelize ORM';
+let modelSupport = [model, 'mongodb'];
+
+let action = {
+    install: 'install',
+    uninstall: 'uninstall'
+};
+
+/**
+ * Commander options define
+ */
+program
+    .version(pkg.version)
+    .usage('[options] [command]')
+    .option('-m, --module', 'add module')
+    .option('-t, --theme', 'add theme')
+    .option('-f, --filter', 'add filter for nunjucks template engines')
+    .option('-i, --info', 'view information')
+    .option('-c, --config', 'view configuration')
+    .option('-s, --support', 'view support information')
+    .option('-v, --version', 'view version generator')
+    .parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+    program.outputHelp();
+}
+
+/**
+ * Show information
+ */
+if (program.info) {
+    console.log('\n  ', chalk.bgRed.bold.yellow('Life-parser generator.\n'));
+    console.log('  [*] Version: ', chalk.green(pkg.version));
+    console.log('  [*] Name: ', chalk.cyan(pkg.name));
+    console.log('  [*] Description: ', chalk.cyan(pkg.description));
+    console.log('  [*] Author: ', chalk.cyan(pkg.author));
+    console.log('  [*] Homepage: ', chalk.cyan.bold(pkg.home));
+    console.log('  [*] License: ', chalk.cyan(pkg.license));
+}
+
+/**
+ * Module generator process
+ */
+if (program.module) {
+    if (!program.args.length || program.args.length < 2) {
+        console.log('\n   Use: ' + chalk.yellow('$ life-parser %s -m %s\n'), chalk.cyan("<action>"), chalk.cyan("<Module Name>"));
+        console.log('   Ex: ' + chalk.yellow('$ life-parser %s -m %s'), chalk.cyan(action.install), chalk.cyan("blog"));
+    } else {
+        try {
+            fs.exists('./app/modules', function (e) {
+                if (e) {
+                    if (process.argv[2].toString().toLowerCase() === action.install) {
+
+                        // TODO: check if module already then return
+                        //* Installation modules */
+                        for (let i in program.args) {
+                            if (program.args.hasOwnProperty(i))
+                                generator.module.install(__dirname + '/app/modules', program.args[i]);
+                        }
+
+                    } else if (process.argv[2].toString().toLowerCase() === action.uninstall) {
+
+                        //* Uninstall module */
+                        for (let i in program.args) {
+                            if (program.args.hasOwnProperty(i)) {
+
+                                // Fixme: Execution command running async, cannot get status code
+                                let code = generator.module.uninstall(__dirname + sep + ['app', 'modules'].join(sep) + sep + program.args[i]);
+                                let moduleName = program.args[i].split(sep)[program.args[i].split(sep).length - 1];
+                                if (code === 2) {
+                                    return console.log('\n   Cannot find module %s', moduleName);
+                                }
+                                console.log(chalk.cyan('\n   Uninstall module [%s] success.'), moduleName);
+                            }
+                        }
+
+                    } else {
+                        console.log('\n   error: unknown action `%s`', process.argv[2]);
+                    }
+                } else {
+                    console.log('\n   App not found, init app now! Use: %s', chalk.yellow('$ life-parser [ProjectName]'));
+                }
+            });
+        } catch (e) {
+            if (e) {
+                throw new Error('Something is broken. Please let us know and try again your command.');
+            }
+        }
+    }
+
+}
+
+program.viewEngine = viewEngine;
+program.theme = theme;
+program.model = model;
+
+if (program.config) {
+    console.log('\n  Default configuration.\n');
+    console.log('  [*] Template engine:', chalk.cyan(program.viewEngine));
+    console.log('  [*] Theme:', chalk.cyan(program.theme));
+    console.log('  [*] Database model:', chalk.cyan(program.model));
+    console.log('\n  ', chalk.yellow('Following command line for custom template engine.\n'));
+    console.log(chalk.cyan('  $ life-parser -c [handlebars]\n'));
+    console.log(chalk.red('  [+] Template engine support:', chalk.cyan(viewEngineSupport)));
+    console.log(chalk.red('  [+] Theme initialization:', chalk.cyan(themeSupport)));
+    console.log(chalk.red('  [+] Database models support:', chalk.cyan(modelSupport)));
+
+    console.log('\n  ', chalk.yellow('Tracking #ChangeLogs on github for update feature.\n'));
+    console.log(chalk.bold('  [#]', pkg.CHANGELOG, '\n'));
+
+    let custom = program.args.shift();
+    viewEngineSupport.map(function (engine) {
+        if (custom === engine) program.viewEngine = custom;
+    })
+}
+let appName = '';
+
+pkg = {
+    name: appName || '',
+    version: '0.0.0',
+    "description": "Web application generator on life-parser build on Nodejs platform.",
+    "main": "server.js",
+    script: {
+        start: 'node server.js',
+        test: 'mocha test'
+    },
+    dependencies: {
+        "bluebird": "^2.10.2",
+        "body-parser": "^1.14.1",
+        "chalk": "^1.1.1",
+        "connect-flash": "^0.1.1",
+        "connect-redis": "^3.0.1",
+        "cookie-parser": "^1.4.0",
+        "debug": "^2.2.0",
+        "express": "^4.13.3",
+        "express-session": "^1.12.0",
+        "express-useragent": "^0.2.0",
+        "express-validator": "^2.17.1",
+        "glob": "^5.0.15",
+        "helmet": "^0.12.0",
+        "lodash": "^3.10.1",
+        "method-override": "^2.3.5",
+        "moment": "^2.10.6",
+        "morgan": "^1.6.1",
+        "nunjucks": "^2.1.0",
+        "passport": "^0.3.0",
+        "passport-facebook": "^2.0.0",
+        "passport-local": "^1.0.0",
+        "pmx": "^0.5.5",
+        "redis": "^2.2.5",
+        "request-promise": "^1.0.2"
+    },
+    "devDependencies": {
+        "bower": "^1.5.3",
+        "chai": "^3.3.0",
+        "gulp": "^3.9.0",
+        "mocha": "^2.3.3",
+        "react-tools": "^0.13.3",
+        "webpack": "^1.12.4"
+    }
+};
+
+pkg.dependencies = sortedObject(pkg.dependencies);
+
+let destinationPath = program.args.shift() || '.';
+let dest = path.join(__dirname, destinationPath);
+
+function createApplication() {
+
+    // CREATED DIRECTORY STRUCTURE
+    mkdir(dest, function () {
+        // application
+        mkdir(dest + '/app/middleware');
+        mkdir(dest + '/app/custom_filers/partials');
+        mkdir(dest + '/app/custom_filers/system');
+
+        // configuration
+        mkdir(dest + '/config/env');
+        mkdir(dest + '/config/strategies');
+
+        // libraries
+        mkdir(dest + '/libs');
+        copy_template('libs', 'render_manager.js', dest + '/libs/render_manager.js');
+
+        // public
+        mkdir(dest + '/public/libs');
+
+        mkdir(dest + '/public/_base/css');
+        mkdir(dest + '/public/_base/scss');
+        mkdir(dest + '/public/_base/js');
+        mkdir(dest + '/public/_base/img');
+        mkdir(dest + '/public/_base/fonts');
+
+        mkdir(dest + '/public/bootstrap/css');
+        mkdir(dest + '/public/bootstrap/scss');
+        mkdir(dest + '/public/bootstrap/js');
+        mkdir(dest + '/public/bootstrap/img');
+        mkdir(dest + '/public/bootstrap/fonts');
+
+        // themes
+        mkdir(dest + '/themes/backend/bootstrap/partials/users');
+        mkdir(dest + '/themes/frontend/bootstrap/partials/users');
+
+        // modules examples
+        mkdir(dest + '/app/modules/users/frontend/models');
+
+        mkdir(dest + '/app/modules/users/frontend/views');
+
+        mkdir(dest + '/app/modules/users/frontend/controllers');
+        mkdir(dest + '/app/modules/users/backend/models');
+        mkdir(dest + '/app/modules/users/backend/views');
+        mkdir(dest + '/app/modules/users/backend/controllers');
+    });
+
+    //complete(appName);
+}
+
+function complete(appName) {
+    console.log('\n  install dependencies:');
+    console.log('    > cd', appName, ' && npm install\n');
+    console.log('\n  run the app:');
+    console.log('    > SET DEBUG=', appName, ':* & npm start\n');
+}
+
+function jsonLoad(obj) {
+    for (let i in obj) {
+        if (obj.hasOwnProperty(i)) {
+            if (obj[i] instanceof Array) {
+
+            }
+        }
+    }
+}

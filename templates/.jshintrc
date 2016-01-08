@@ -1,0 +1,18 @@
+{
+  // JSHint Default Configuration File (as on JSHint website)
+  // See http://jshint.com/docs/ for more details
+
+  "maxerr": 50,
+  // {int} Maximum error before stopping
+
+  "varstmt": false,
+  // true: Disallow any var statements. Only `let` and `const` are allowed.
+  "curly": true,
+  "eqeqeq": true,
+  "undef": true,
+  // Custom Globals
+  "globals": {
+    "jQuery": true
+  }
+  // additional predefined global variables
+}

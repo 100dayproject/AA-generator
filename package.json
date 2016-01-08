@@ -1,0 +1,54 @@
+{
+  "name": "lifeparser-generator",
+  "version": "1.0.0",
+  "description": "'Life parser' application generator",
+  "main": "bin/life-parser",
+  "bin": {
+    "life-parser": "./bin/life-parser"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha tests"
+  },
+  "preferGlobal": true,
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "commander": "^2.9.0",
+    "mkdirp": "^0.5.1",
+    "sorted-object": "^1.0.0"
+  },
+  "files": [
+    "LICENSE",
+    "bin/",
+    "templates/"
+  ],
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/100dayproject/AA-generator.git"
+  },
+  "keywords": [
+    "AA",
+    "web",
+    "api",
+    "generator",
+    "cms",
+    "REST",
+    "restful"
+  ],
+  "author": "Vietworm",
+  "home": "http://100dayproject.org",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/100dayproject/AA-generator/issues"
+  },
+  "CHANGELOG": "https://github.com/100dayproject/AA-generator/blob/master/CHANGELOG.md",
+  "homepage": "https://github.com/100dayproject/AA-generator#readme",
+  "devDependencies": {
+    "mocha": "^2.3.4",
+    "should": "^7.1.1",
+    "sinon": "^1.17.2",
+    "testem": "^0.9.11"
+  }
+}

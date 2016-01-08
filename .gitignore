@@ -1,0 +1,8 @@
+/templates/app/modules/CollectionModels
+# Created by .ignore support plugin (hsz.mobi)
+/templates/logs
+/templates/gulpfile.bak.js
+/templates/config/env/development.js
+/templates/bower
+.idea/
+/.idea/

@@ -1,0 +1,12 @@
+.toolbar {
+    padding: 10px 0;
+}
+
+.toolbar a {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.toolbar a[data-toggle="modal"] {
+    margin-right: 0;
+}
